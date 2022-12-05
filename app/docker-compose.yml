@@ -1,10 +1,19 @@
+#
+# This is from the official DOCKER site.
+# https://docs.docker.com/get-started/08_using_compose/
+#
+# Follow the online getting started guide to do this exercise.
+# I added the Prometheus, Grafana and Netshoot containers.
+#
+# Sun 2022Dec04 16:57:40 PST
+#
 services:
   nodeapp:
     image: node:18-alpine
     container_name: nodeapp
     command: sh -c "yarn install && yarn run dev"
     ports:
-      - 3000:3000
+      - 4000:4000
     working_dir: /app
     volumes:
       - ./:/app
@@ -28,6 +37,28 @@ services:
     container_name: netutils
     restart: on-failure
     command: ["sleep", "infinity"]
-
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
 volumes:
+  prom_data:
   todo-mysql-data:
